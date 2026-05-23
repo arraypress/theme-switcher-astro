@@ -1,0 +1,52 @@
+---
+/**
+ * ThemeScript.astro
+ * -----------------
+ *
+ * Render this inside `<head>` (before any stylesheet that uses
+ * theme tokens). It writes `<html data-theme="…">` synchronously
+ * — *before paint* — based on the localStorage value, so the
+ * page never flashes the wrong scheme on reload.
+ *
+ * Pair with `<ThemeToggle />` (or your own UI) somewhere visible.
+ * Both components must share the same `storageKey` / `lightValue`
+ * / `darkValue` for the toggle to coordinate with the pre-paint
+ * read.
+ *
+ * @example
+ *   <head>
+ *     <ThemeScript />
+ *     <link rel="stylesheet" href="/styles/tokens.css" />
+ *   </head>
+ */
+
+import type { ThemeSwitcherProps } from './types';
+
+const {
+	storageKey = 'theme',
+	lightValue = 'light',
+	darkValue,
+} = Astro.props as ThemeSwitcherProps;
+---
+
+<script
+	is:inline
+	define:vars={{
+		TS_KEY: storageKey,
+		TS_LIGHT: lightValue,
+		TS_DARK: darkValue ?? null,
+	}}
+>
+	(function () {
+		try {
+			var saved = localStorage.getItem(TS_KEY);
+			if (saved === TS_LIGHT) {
+				document.documentElement.setAttribute('data-theme', TS_LIGHT);
+			} else if (saved === TS_DARK && TS_DARK) {
+				document.documentElement.setAttribute('data-theme', TS_DARK);
+			}
+		} catch (_) {
+			/* Storage unavailable (privacy mode / sandbox) — skip. */
+		}
+	})();
+</script>

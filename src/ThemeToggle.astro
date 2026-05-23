@@ -1,0 +1,101 @@
+---
+/**
+ * ThemeToggle.astro
+ * -----------------
+ *
+ * Button that flips `<html data-theme="…">` between two values and
+ * persists the choice to localStorage. Pair with `<ThemeScript />`
+ * in `<head>` to avoid flash-of-wrong-theme on reload.
+ *
+ * The default pattern is **default-is-dark + click toggles light**
+ * (no `data-theme` attribute = dark, `data-theme="light"` = light).
+ * That maps to a `:root { … }` + `:root[data-theme="light"] { … }`
+ * token split. Pass `darkValue` if your token cascade keys off an
+ * explicit `data-theme="dark"` instead.
+ *
+ * Survives Astro view transitions by re-binding the click handler
+ * on every `astro:page-load` event.
+ *
+ * The sun + moon icons are inline SVGs you can style via `currentColor`.
+ * Hide one or the other based on the active state in your CSS:
+ *
+ * ```css
+ * .theme-toggle .theme-toggle-moon { display: none; }
+ * :root[data-theme="light"] .theme-toggle .theme-toggle-sun { display: none; }
+ * :root[data-theme="light"] .theme-toggle .theme-toggle-moon { display: inline; }
+ * ```
+ *
+ * @example
+ *   <ThemeToggle />
+ *   <ThemeToggle storageKey="my-app-theme" />
+ */
+
+import type { ThemeSwitcherProps } from './types';
+
+const {
+	storageKey = 'theme',
+	lightValue = 'light',
+	darkValue,
+	id = 'theme-toggle',
+	class: className,
+	label = 'Toggle dark / light mode',
+} = Astro.props as ThemeSwitcherProps;
+---
+
+<button id={id} type="button" class:list={['theme-toggle', className]} aria-label={label}>
+	<svg class="theme-toggle-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+		<circle cx="12" cy="12" r="4"/>
+		<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+	</svg>
+	<svg class="theme-toggle-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+		<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+	</svg>
+</button>
+
+<script
+	is:inline
+	define:vars={{
+		TS_BTN_ID: id,
+		TS_KEY: storageKey,
+		TS_LIGHT: lightValue,
+		TS_DARK: darkValue ?? null,
+	}}
+>
+	(function () {
+		function init() {
+			var btn = document.getElementById(TS_BTN_ID);
+			if (!btn || btn.dataset.tsBound === '1') return;
+			btn.dataset.tsBound = '1';
+
+			btn.addEventListener('click', function () {
+				var html = document.documentElement;
+				var current = html.getAttribute('data-theme');
+				var isLight = current === TS_LIGHT;
+
+				if (isLight) {
+					/* Going from light → dark. */
+					if (TS_DARK) {
+						html.setAttribute('data-theme', TS_DARK);
+					} else {
+						html.removeAttribute('data-theme');
+					}
+					try { localStorage.setItem(TS_KEY, TS_DARK || 'dark'); } catch (_) {}
+				} else {
+					/* Going to light. */
+					html.setAttribute('data-theme', TS_LIGHT);
+					try { localStorage.setItem(TS_KEY, TS_LIGHT); } catch (_) {}
+				}
+
+				/* Fire a synthetic event so app code can react. */
+				html.dispatchEvent(new CustomEvent('themechange', {
+					detail: { theme: html.getAttribute('data-theme') || 'dark' },
+					bubbles: true,
+				}));
+			});
+		}
+
+		document.addEventListener('astro:page-load', init);
+		if (document.readyState !== 'loading') init();
+		else document.addEventListener('DOMContentLoaded', init);
+	})();
+</script>

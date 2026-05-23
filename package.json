@@ -1,0 +1,62 @@
+{
+  "name": "@arraypress/theme-switcher-astro",
+  "version": "1.0.0",
+  "description": "Astro light/dark theme toggle — pre-paint flicker fix, localStorage persistence, view-transition safe.",
+  "type": "module",
+  "files": [
+    "src/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./ThemeToggle.astro": "./src/ThemeToggle.astro",
+    "./ThemeScript.astro": "./src/ThemeScript.astro",
+    "./types": {
+      "types": "./src/types.ts",
+      "default": "./src/types.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "astro",
+    "astro-component",
+    "theme",
+    "dark-mode",
+    "light-mode",
+    "theme-toggle",
+    "color-scheme",
+    "view-transitions",
+    "withastro"
+  ],
+  "author": "ArrayPress",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arraypress/theme-switcher-astro.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "peerDependencies": {
+    "astro": "^6.0.0"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "astro": "^6.3.7",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.7"
+  }
+}
